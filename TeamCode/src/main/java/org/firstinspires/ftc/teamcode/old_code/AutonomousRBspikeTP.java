@@ -1,7 +1,8 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.old_code;
 
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.IMU;
@@ -24,8 +25,9 @@ import org.firstinspires.ftc.vision.tfod.TfodProcessor;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-@Autonomous(name = "AutonomousLBspikeTP", group = "Autonomous")
-public class AutonomousLBspikeTP extends LinearOpMode {
+@Autonomous(name = "AutonomousRBspikeTP", group = "Autonomous")
+@Disabled
+public class AutonomousRBspikeTP extends LinearOpMode {
     // Declare OpMode members for each of the 4 motors.
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor leftFrontDrive = null;
@@ -140,7 +142,7 @@ public class AutonomousLBspikeTP extends LinearOpMode {
         while (opModeIsActive()) {
             if (initial) {
                 initial = false;
-                xMovement(false, 10, 0);
+                xMovement(true, 10, 0);
                 // detect from starting location
                 runtime.reset();
                 int TPDetection = 0;
@@ -151,61 +153,64 @@ public class AutonomousLBspikeTP extends LinearOpMode {
                     }
                     sleep(10);
                 }
-                // on right mark
+                // on left mark
                 if (TPDetection == 0) {
-                    DESIRED_TAG_ID = 3;
+                    DESIRED_TAG_ID = 4;
                     // drive to mark
-                    xMovement(false, 4, 0);
+                    xMovement(true, 4, 0);
                     yMovement(true, 70, 0);
-                    turnToHeading(STANDARD_TURN_SPEED, -90);
-                    yMovement(true, 34, -90);
+                    turnToHeading(STANDARD_TURN_SPEED, 90);
+                    yMovement(true, 34, 90);
                     // place pixel
                     pixelDropper.setPosition(0.0);
                     sleep(1000);
                     // drive back to start
-                    yMovement(false, 42, -90);
+                    yMovement(false, 42, 90);
                     turnToHeading(STANDARD_TURN_SPEED, 0);
                     yMovement(false, 63, 0);
                 }
                 // on centre mark
-                else if (TPDetection == 2) {
-                    DESIRED_TAG_ID = 2;
+                else if (TPDetection == 1) {
+                    DESIRED_TAG_ID = 5;
                     // drive to mark
-                    xMovement(true, 10, 0);
+                    xMovement(false, 10, 0);
                     yMovement(true, 84, 0);
                     // place pixel
                     pixelDropper.setPosition(0.0);
                     sleep(1000);
                     // drive back to start
                     yMovement(false, 78, 0);
-                    xMovement(false, 10, 0);
+                    xMovement(true, 10, 0);
                 }
-                // on left mark
+                // on right mark
                 else {
-                    DESIRED_TAG_ID = 1;
+                    DESIRED_TAG_ID = 6;
                     // drive to mark
-                    xMovement(false, 8, 0);
+                    xMovement(true, 8, 0);
                     yMovement(true, 58, 0);
                     // place pixel
                     pixelDropper.setPosition(0.0);
                     sleep(1000);
                     // drive back to start
-                    xMovement(true, 8, 0);
+                    xMovement(false, 8, 0);
                     yMovement(false, 44, 0);
                 }
                 // drive to board
-                turnToHeading(STANDARD_TURN_SPEED, 90);
-                yMovement(true, 83, 90);
-//                correctHeading(STANDARD_TURN_SPEED, 90);
+                turnToHeading(STANDARD_TURN_SPEED, -90);
+                yMovement(true, 83, -90);
+                correctHeading(STANDARD_TURN_SPEED, -90);
+
 //                armServoBase.setPosition((double) 170 / 180);
 //                slideMovement(false, 52);
 //                armServoBase.setPosition((double) 80 / 180);
 //                armServoTop.setPosition((double) 180 / 180);
-//
-//
-//                if (DESIRED_TAG_ID == 1) {
+
+
+
+
+//                if (DESIRED_TAG_ID == 4) {
 //                    xMovement(false, 55, -90);
-//                } else if (DESIRED_TAG_ID == 2) {
+//                } else if (DESIRED_TAG_ID == 5) {
 //                    xMovement(false, 40, -90);
 //                } else {
 //                    xMovement(false, 32, -90);
@@ -245,7 +250,7 @@ public class AutonomousLBspikeTP extends LinearOpMode {
 //                    }
 //                    sleep(10);
 //                }
-//                xMovement(false ,10,90);
+//                xMovement(false,10,-90);
 //                clawServo.setPosition(0.0);
 //                sleep(5000);
             }
@@ -284,7 +289,7 @@ public class AutonomousLBspikeTP extends LinearOpMode {
             }
 
             // Stop all motion;
-            brakeAll();
+                brakeAll();
 
             // Turn off RUN_TO_POSITION
             leftFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
