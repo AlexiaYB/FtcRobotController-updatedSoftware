@@ -17,13 +17,15 @@ public class SimpleOpenCV extends OpMode {
                 hardwareMap.get(WebcamName.class, "Webcam 1"), drawRectangleProcessor);
     }
     @Override
-    public void init_loop(){}
+    public void init_loop(){telemetry.addData("Identified", drawRectangleProcessor.getSelection());}
 
     @Override
     public void start(){
         visionPortal.stopStreaming();
     }
     @Override
-    public void loop(){}
+    public void loop(){
+        telemetry.addData("Identified", drawRectangleProcessor.getSelection());
+    }
 
 }
