@@ -2,10 +2,10 @@ package org.firstinspires.ftc.teamcode;
 
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.Gamepad;
-
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 
 public class TapeMeasureTest extends LinearOpMode {
@@ -22,6 +22,39 @@ public class TapeMeasureTest extends LinearOpMode {
                 ATapeMeasure.setPower(-1.0);
             }
 
+        }
+    }
+
+    @TeleOp(name = "hangingTest", group = "Concept")
+
+    public static class hangingTest extends LinearOpMode {
+        private ElapsedTime runtime = new ElapsedTime();
+
+        // Define class members
+        DcMotor hangingMotorLeft;
+        DcMotor hangingMotorRight;
+
+
+        @Override
+        public void runOpMode() {
+
+            // Connect to servo (Assume Robot Left Hand)
+            // Change the text in quotes to match any servo name on your robot.
+            hangingMotorLeft = hardwareMap.get(DcMotor.class, "hanging_right");
+            hangingMotorRight = hardwareMap.get(DcMotor.class, "hanging_left");
+            hangingMotorRight.setDirection(DcMotor.Direction.REVERSE);
+
+            telemetry.addData(">", "press start");
+            telemetry.update();
+            waitForStart();
+            runtime.reset();
+
+            while (opModeIsActive()) {
+                double rightPower = gamepad2.right_stick_y;
+                double leftPower = gamepad2.left_stick_y;
+                hangingMotorRight.setPower(rightPower);
+                hangingMotorLeft.setPower(leftPower);
+            }
         }
     }
 }
