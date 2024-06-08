@@ -40,10 +40,14 @@ public class DriverCentric extends LinearOpMode {
         Servo claw = hardwareMap.servo.get("claw");
         Servo armTop = hardwareMap.servo.get("armTop");
         Servo armBase = hardwareMap.servo.get("armBase");
+        Servo rightFlip = hardwareMap.servo.get("rightFlip");
+        Servo leftFlip = hardwareMap.servo.get("leftFlip");
         CRServo activeIntake = hardwareMap.crservo.get("activeIntake");
 
         // set up servo positions
         drone.setPosition(0.47);
+        rightFlip.setPosition(0.3);
+        leftFlip.setPosition(0.35);
 
         ArmMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         ArmMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -81,6 +85,8 @@ public class DriverCentric extends LinearOpMode {
                 // drone firing & releasing hooks
                 if(current.triangle){
                     drone.setPosition(0);
+                    rightFlip.setPosition(1.0);
+                    leftFlip.setPosition(1.0);
                 }
 
                 // hanging motors
@@ -157,22 +163,22 @@ public class DriverCentric extends LinearOpMode {
             if (current.cross && !previous.cross){
                 armBase.setPosition(1);
                 claw.setPosition(0.12);
-                armTop.setPosition(0.32);
+                armTop.setPosition(0.45);
             }
 //            // 2
             if (current.circle && !previous.circle){
                 armBase.setPosition(0.90);
-                armTop.setPosition(0.45);
+                armTop.setPosition(0.52);
             }
             // close claw & move up
             if (current.square && !previous.square){
                 claw.setPosition(1.0);
-                armBase.setPosition(0.86);
+                armBase.setPosition(0.85);
                 sleep(600);
-                armTop.setPosition(0.70);
+                armTop.setPosition(0.64);
                 timer.reset();
-                while (timer.seconds() < 2) {
-                    activeIntake.setPower(-0.3);
+                while (timer.seconds() < 1.5) {
+                    activeIntake.setPower(-0.2);
                 }
                 armBase.setPosition(1);
             }
