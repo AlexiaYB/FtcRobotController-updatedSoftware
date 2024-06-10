@@ -27,7 +27,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.teamcode.tests_unused;
+package org.firstinspires.ftc.teamcode.old_code.tests_unused;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -35,12 +35,15 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 
-@TeleOp(name="SlideTest", group="TestGroup")
+@TeleOp(name="ConnectionTest", group="ConnectionTestGroup")
 @Disabled
-public class SlideTest extends LinearOpMode {
+public class ConnectionTest extends LinearOpMode {
     // Declare OpMode members.
     // Drive Train motors
-    private DcMotor SlideDrive = null;
+    private DcMotor leftFrontDrive = null;
+    private DcMotor leftBackDrive = null;
+    private DcMotor rightFrontDrive = null;
+    private DcMotor rightBackDrive = null;
 
 
     @Override
@@ -48,7 +51,12 @@ public class SlideTest extends LinearOpMode {
     public void runOpMode() {
         // initialising variables
         // from hardware map
-        SlideDrive  = hardwareMap.get(DcMotor.class, "slide_drive");
+        leftFrontDrive  = hardwareMap.get(DcMotor.class, "left_front_drive");
+        leftBackDrive  = hardwareMap.get(DcMotor.class, "left_back_drive");
+        rightFrontDrive = hardwareMap.get(DcMotor.class, "right_front_drive");
+        rightBackDrive = hardwareMap.get(DcMotor.class, "right_back_drive");
+        // accounting for reversed motor
+        rightFrontDrive.setDirection(DcMotor.Direction.REVERSE);
         // indicating initialisation complete
         telemetry.addData("Status", "Initialized & Connected");
         telemetry.update();
@@ -61,13 +69,36 @@ public class SlideTest extends LinearOpMode {
             // Drive Train Test:
             // calculating power to wheels
             double y = -gamepad2.left_stick_y; // y-stick reversed
+            double x = gamepad2.right_stick_x; // Counteracts imperfect strafing
+            double rx = gamepad2.left_stick_x * 1.1;
 
+            // Send calculated power to wheels
+            // ensures that power doesn't exceed abs(1)
+            double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
+            double leftFrontPower = (y + x + rx) / denominator;
+            double leftBackPower = (y - x + rx) / denominator;
+            double rightFrontPower = (y - x - rx) / denominator;
+            double rightBackPower = (y + x - rx) / denominator;
 
             // sends power to the wheels
-            SlideDrive.setPower(y);
-
+            leftFrontDrive.setPower(leftFrontPower);
+            rightFrontDrive.setPower(rightFrontPower);
+            leftBackDrive.setPower(leftBackPower);
+            rightBackDrive.setPower(rightBackPower);
 
             // telemetry data to show working controller & power that should be going to motors
+            double LFDencoder = leftFrontDrive.getCurrentPosition();
+            double RFDencoder = rightFrontDrive.getCurrentPosition();
+            telemetry.addData("y",y);
+            telemetry.addData("x",x);
+            telemetry.addData("rx",rx);
+            telemetry.addData("denominator",denominator);
+            telemetry.addData("frontLeftPower",leftFrontPower);
+            telemetry.addData("backLeftPower",leftBackPower);
+            telemetry.addData("frontRightPower",rightFrontPower);
+            telemetry.addData("backRightPower",rightBackPower);
+            telemetry.addData("LFD encoder:", LFDencoder);
+            telemetry.addData("RFD encoder:", RFDencoder);
             telemetry.update();
         }
     }
