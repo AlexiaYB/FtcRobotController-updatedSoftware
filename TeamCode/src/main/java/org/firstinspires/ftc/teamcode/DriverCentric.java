@@ -20,8 +20,12 @@ import java.util.List;
 public class DriverCentric extends LinearOpMode {
     private ElapsedTime timer = new ElapsedTime();
     private ElapsedTime overallTimer = new ElapsedTime();
-    Gamepad current = new Gamepad();
-    Gamepad previous = new Gamepad();
+    boolean slideDown = false;
+
+    Gamepad current1 = new Gamepad();
+    Gamepad previous1 = new Gamepad();
+    Gamepad current2 = new Gamepad();
+    Gamepad previous2 = new Gamepad();
     int driveMultiplierPlace = 0;
     List<Double> multipliers = Arrays.asList(1.0,0.75,0.5,0.25);
 
@@ -64,42 +68,44 @@ public class DriverCentric extends LinearOpMode {
         imu.resetYaw();
 
         waitForStart();
-        timer.reset();
+        overallTimer.reset();
 
         if (isStopRequested()) return;
 
         while (opModeIsActive()) {
             // get gamepad values
-            previous.copy(current);
-            current.copy(gamepad2);
-            double y = -current.left_stick_y;
-            double x = current.left_stick_x;
-            double rx = current.right_stick_x;
+            previous2.copy(current2);
+            current2.copy(gamepad2);
+            previous1.copy(current1);
+            current1.copy(gamepad1);
+            double y = -current2.left_stick_y;
+            double x = current2.left_stick_x;
+            double rx = current2.right_stick_x;
             // value adjusts
             // in case imu shifts slightly
-            if(current.options){
+            if(current2.options){
                 imu.resetYaw();
             }
             // endgame things
             if(overallTimer.seconds() > 90){
                 // drone firing & releasing hooks
-                if(current.triangle){
+                if(current2.triangle){
                     drone.setPosition(0);
                     rightFlip.setPosition(1.0);
                     leftFlip.setPosition(1.0);
                 }
 
                 // hanging motors
-                if (current.left_bumper) {
+                if (current2.left_bumper) {
                     leftHanging.setPower(1);
                 }
-                if (current.right_bumper) {
+                if (current2.right_bumper) {
                     rightHanging.setPower(1);
                 }
-                if (current.left_trigger == 1) {
+                if (current2.left_trigger == 1) {
                     leftHanging.setPower(-1);
                 }
-                if (current.right_trigger == 1) {
+                if (current2.right_trigger == 1) {
                     rightHanging.setPower(-1);
                 } else {
                     rightHanging.setPower(0);
@@ -107,20 +113,20 @@ public class DriverCentric extends LinearOpMode {
                 }
             }
             // active intake operation
-            if (current.dpad_right) {
+            if (current2.dpad_right) {
                 activeIntake.setPower(-1.0);
             }
-            else if (current.dpad_left) {
+            else if (current2.dpad_left) {
                 activeIntake.setPower(1.0);
             }
             else{
                 activeIntake.setPower(0.0);
             }
             // driver multipliers
-            if(current.left_stick_button && !previous.left_stick_button && driveMultiplierPlace != 0){
+            if(current2.left_stick_button && !previous2.left_stick_button && driveMultiplierPlace != 0){
                 driveMultiplierPlace --;
             }
-            if(current.right_stick_button && !previous.right_stick_button && driveMultiplierPlace != 3){
+            if(current2.right_stick_button && !previous2.right_stick_button && driveMultiplierPlace != 3){
                 driveMultiplierPlace ++;
             }
 
@@ -148,50 +154,53 @@ public class DriverCentric extends LinearOpMode {
             frontRightMotor.setPower(frontRightPower* multipliers.get(driveMultiplierPlace));
             backRightMotor.setPower(backRightPower * multipliers.get(driveMultiplierPlace));
 
-            // Arm & outtake
-            // move slide up board & hold position
-            if (current.dpad_up && ArmMotor.getCurrentPosition() < 5980) {
-                ArmMotor.setPower(0.5);
-            } else if (current.dpad_down) {
-                ArmMotor.setPower(-0.5);
-            } else {
-                ArmMotor.setPower(0.001);
+            // Arm & outtake gamepad1 controlled
+            // move slide
+            if(slideDown == false) {
+                // move slide up board & hold position
+                if (current2.dpad_up && ArmMotor.getCurrentPosition() < 5800) {
+                    ArmMotor.setPower(0.5);
+                } else if (current2.dpad_down) {
+                    ArmMotor.setPower(-0.5);
+                } else {
+                    ArmMotor.setPower(0.001);
+                }
+                // continue movement in
+            } else if (ArmMotor.getCurrentPosition() > 150){
+                ArmMotor.setPower(-1);
+                // end movement in
+            } else{
+                slideDown = false;
+                ArmMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                armBase.setPosition(0.90);
+                armTop.setPosition(0.52);
+                ArmMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                ArmMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             }
 
-//            // intake to outake
-//            // 1
-            if (current.cross && !previous.cross){
+            // intake to outtake
+            // start movement in
+            if (current2.circle && !previous2.circle){
                 armBase.setPosition(1);
                 claw.setPosition(0.12);
                 armTop.setPosition(0.45);
+                slideDown = true;
             }
-//            // 2
-            if (current.circle && !previous.circle){
-                armBase.setPosition(0.90);
-                armTop.setPosition(0.52);
-            }
-            // close claw & move up
-            if (current.square && !previous.square){
-                claw.setPosition(1.0);
+            // close claw for movement out
+            if (current2.square && !previous2.square){
                 armBase.setPosition(0.85);
-                sleep(600);
-                armTop.setPosition(0.64);
-                timer.reset();
-                while (timer.seconds() < 1.5) {
-                    activeIntake.setPower(-0.2);
-                }
-                armBase.setPosition(1);
+                claw.setPosition(1.0);
+                armBase.setPosition(1.0);
             }
-            // open/close gripper
-//            if (current.cross && !previous.cross) {
-//                if (gripper_open) {
-//                    clawServo.setPosition(1.0);
-//                    gripper_open = false;
-//                } else {
-//                    clawServo.setPosition(0.0);
-//                    gripper_open = true;
-//                }
-//            }
+            // set claw to position on board
+            if(ArmMotor.getCurrentPosition() > 2650 && slideDown == false){
+                armBase.setPosition(0.70);
+                armTop.setPosition(0.48);
+            }
+            // open claw
+            if(current2.cross && !previous2.cross){
+                claw.setPosition(0.05);
+            }
             telemetry.addData("counts: ",ArmMotor.getCurrentPosition());
             telemetry.update();
 
