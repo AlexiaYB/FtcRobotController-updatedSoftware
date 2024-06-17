@@ -12,12 +12,18 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
-public class DrawRectangleProcessor implements VisionProcessor {
-    public Rect rectLeft = new Rect(70, 0, 100, 83);
-    public Rect rectRight = new Rect(445, 0, 100, 150);
+public class overallEOCVprocessor implements VisionProcessor {
+    public Rect rectLeft;
+    public  Rect rectRight;
+
     Selected selection = Selected.NONE;
     Mat submat = new Mat();
     Mat hsvMat = new Mat();
+
+    public overallEOCVprocessor(Rect rectLeftInput, Rect rectRightInput){
+        rectLeft = rectLeftInput;
+        rectRight = rectRightInput;
+    }
 
     @Override
     public void init(int width, int height, CameraCalibration calibration) {}
