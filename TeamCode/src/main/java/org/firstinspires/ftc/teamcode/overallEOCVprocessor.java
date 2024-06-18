@@ -21,6 +21,9 @@ public class overallEOCVprocessor implements VisionProcessor{
     public double distanceRectLeft;
     public double distanceRectRight;
 
+    public double hueLeft;
+    public double hueRight;
+
     Selected selection = Selected.NONE;
     Mat submat = new Mat();
     Mat hsvMat = new Mat();
@@ -37,17 +40,22 @@ public class overallEOCVprocessor implements VisionProcessor{
     @Override
     public Object processFrame(Mat frame, long captureTimeNanos) {
         Imgproc.cvtColor(frame, hsvMat, Imgproc.COLOR_RGB2HSV);
-        distanceRectLeft = getColourDistance(hsvMat, rectLeft);
-        distanceRectRight = getColourDistance(hsvMat, rectRight);
+        distanceRectLeft = getColourDistance(hsvMat, rectLeft, true);
+        distanceRectRight = getColourDistance(hsvMat, rectRight, false);
         if (Math.abs(distanceRectLeft - distanceRectRight ) < 3){
             return Selected.NONE;
         }
         else if (distanceRectLeft < distanceRectRight) {return Selected.LEFT;}
         return Selected.RIGHT;
     }
-    protected double getColourDistance(Mat input,Rect rect){
+    protected double getColourDistance(Mat input,Rect rect, boolean left){
     submat= input.submat(rect);
     Scalar color= Core.mean(submat);
+    if(left){
+        hueLeft = color.val[0];
+    } else{
+        hueRight = color.val[0];
+    }
     double distance;
     if(red){
         if (color.val[0] > 90){
