@@ -12,33 +12,60 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
-public class overallEOCVprocessor implements VisionProcessor {
+
+public class overallEOCVprocessor implements VisionProcessor{
     public Rect rectLeft;
     public  Rect rectRight;
+    public boolean red;
+
+    public double distanceRectLeft;
+    public double distanceRectRight;
 
     Selected selection = Selected.NONE;
     Mat submat = new Mat();
     Mat hsvMat = new Mat();
 
-    public overallEOCVprocessor(Rect rectLeftInput, Rect rectRightInput){
+    public overallEOCVprocessor(Rect rectLeftInput, Rect rectRightInput, boolean redTrue){
         rectLeft = rectLeftInput;
         rectRight = rectRightInput;
+        red = redTrue;
     }
 
     @Override
-    public void init(int width, int height, CameraCalibration calibration) {}
+    public void init(int width, int height, CameraCalibration calibration) {;
+    }
     @Override
     public Object processFrame(Mat frame, long captureTimeNanos) {
         Imgproc.cvtColor(frame, hsvMat, Imgproc.COLOR_RGB2HSV);
-        double satRectLeft = getAvgSaturation(hsvMat, rectLeft);
-        double satRectRight = getAvgSaturation(hsvMat, rectRight);
-        if (satRectLeft > satRectRight) {return Selected.LEFT;}
+        distanceRectLeft = getColourDistance(hsvMat, rectLeft);
+        distanceRectRight = getColourDistance(hsvMat, rectRight);
+        if (Math.abs(distanceRectLeft - distanceRectRight ) < 3){
+            return Selected.NONE;
+        }
+        else if (distanceRectLeft < distanceRectRight) {return Selected.LEFT;}
         return Selected.RIGHT;
     }
-    protected double getAvgSaturation(Mat input,Rect rect){
+    protected double getColourDistance(Mat input,Rect rect){
     submat= input.submat(rect);
     Scalar color= Core.mean(submat);
-    return color.val[1];
+    double distance;
+    if(red){
+        if (color.val[0] > 90){
+            distance = 180 - color.val[0];
+        }
+        else{
+            distance = color.val[0];
+        }
+    }
+    else{
+        if (color.val[0] > 120){
+            distance = color.val[0] - 120;
+        }
+        else{
+            distance = 120 - color.val[0];
+        }
+    }
+    return distance;
     }
 
     private android.graphics.Rect makeGraphicsRect(Rect rect, float scaleBmpPxToCanvasPx) {

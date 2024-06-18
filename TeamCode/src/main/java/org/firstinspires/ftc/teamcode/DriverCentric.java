@@ -52,8 +52,8 @@ public class DriverCentric extends LinearOpMode {
         rightFlip.setPosition(0.3);
         leftFlip.setPosition(0.35);
         claw.setPosition(0.12);
-        armBase.setPosition(0.55);
-        armTop.setPosition(0.56);
+        armBase.setPosition(0.45);
+        armTop.setPosition(0.53);
 
         ArmMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         ArmMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -166,24 +166,26 @@ public class DriverCentric extends LinearOpMode {
             if (current1.cross && !previous1.cross){
                 claw.setPosition(0.05);
             } else if (!current1.cross && previous1.cross) {
-                armBase.setPosition(1);
+                armBase.setPosition(0.55);
                 claw.setPosition(0.12);
                 armTop.setPosition(0.45);
             }
             // . setting for intake
             if (current1.circle && !previous1.circle){
-                armBase.setPosition(0.55);
-                armTop.setPosition(0.56);
+                armBase.setPosition(0.45);
+                armTop.setPosition(0.53);
+                claw.setPosition(0.1);
             }
             // . setting for outtake (close)
             if (current1.square && !previous1.square){
                 claw.setPosition(1.0);
-                armBase.setPosition(1.0);
+                armBase.setPosition(0.55);
+                armTop.setPosition(0.45);
             }
             // . board setting
             if(current1.triangle && !previous1.triangle){
-                armBase.setPosition(0.40);
-                armTop.setPosition(0.49);
+                armBase.setPosition(0.35);
+                armTop.setPosition(0.37);
             }
         }
     }
