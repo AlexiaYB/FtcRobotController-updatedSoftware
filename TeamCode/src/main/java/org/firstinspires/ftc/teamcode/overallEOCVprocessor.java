@@ -12,20 +12,17 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
+import java.util.Arrays;
+import java.util.List;
+
 
 public class overallEOCVprocessor implements VisionProcessor{
     public Rect rectLeft;
     public  Rect rectRight;
     public boolean red;
-
-    public double distanceRectLeft;
-    public double distanceRectRight;
-
-    public double hueLeft;
-    public double hueRight;
-
+    public double percentageLeft;
+    public double percentageRight;
     Selected selection = Selected.NONE;
-    Mat submat = new Mat();
     Mat hsvMat = new Mat();
 
     public overallEOCVprocessor(Rect rectLeftInput, Rect rectRightInput, boolean redTrue){
@@ -40,41 +37,26 @@ public class overallEOCVprocessor implements VisionProcessor{
     @Override
     public Object processFrame(Mat frame, long captureTimeNanos) {
         Imgproc.cvtColor(frame, hsvMat, Imgproc.COLOR_RGB2HSV);
-        distanceRectLeft = getColourDistance(hsvMat, rectLeft, true);
-        distanceRectRight = getColourDistance(hsvMat, rectRight, false);
-        if (Math.abs(distanceRectLeft - distanceRectRight ) < 3){
+        // mask & concatenate
+        Mat mask1 = new Mat();
+        Mat mask2 = new Mat();
+        Mat ranged = new Mat();
+        Core.inRange(hsvMat, new Scalar(0, 70, 50), new Scalar(10, 255, 255), mask2);
+        Core.inRange(hsvMat, new Scalar(170, 70, 50), new Scalar(180, 255, 255), mask1);
+        List<Mat> src = Arrays.asList(mask1, mask2);
+        Core.hconcat(src, ranged);
+        // submat & count
+        percentageLeft = Core.countNonZero(ranged.submat(rectLeft)) / (ranged.submat(rectLeft).total()/3.0);
+        percentageRight = Core.countNonZero(ranged.submat(rectRight)) / (ranged.submat(rectRight).total()/3.0);
+
+
+        if (Math.abs(percentageLeft - percentageRight) < 0.1){
             return Selected.NONE;
         }
-        else if (distanceRectLeft < distanceRectRight) {return Selected.LEFT;}
+        if (percentageLeft > percentageRight) {return Selected.LEFT;}
         return Selected.RIGHT;
     }
-    protected double getColourDistance(Mat input,Rect rect, boolean left){
-    submat= input.submat(rect);
-    Scalar color= Core.mean(submat);
-    if(left){
-        hueLeft = color.val[0];
-    } else{
-        hueRight = color.val[0];
-    }
-    double distance;
-    if(red){
-        if (color.val[0] > 90){
-            distance = 180 - color.val[0];
-        }
-        else{
-            distance = color.val[0];
-        }
-    }
-    else{
-        if (color.val[0] > 120){
-            distance = color.val[0] - 120;
-        }
-        else{
-            distance = 120 - color.val[0];
-        }
-    }
-    return distance;
-    }
+
 
     private android.graphics.Rect makeGraphicsRect(Rect rect, float scaleBmpPxToCanvasPx) {
         int left = Math.round(rect.x * scaleBmpPxToCanvasPx);

@@ -6,11 +6,10 @@ import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.teamcode.RR.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.RR.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.opencv.core.Rect;
@@ -30,31 +29,38 @@ public class baseAutoRB extends LinearOpMode {
 
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
         // build trajectories
-        Pose2d startPose = new Pose2d(9, -72, Math.toRadians(90));
+        Pose2d startPose = new Pose2d(15, -63, Math.toRadians(90));
 
         drive.setPoseEstimate(startPose);
 
-        Trajectory purpleRight = drive.trajectoryBuilder(startPose)
-                .splineTo(new Vector2d(13, -50), Math.toRadians(90))
+        Trajectory purpleRightEntry = drive.trajectoryBuilder(startPose)
+                .splineTo(new Vector2d(18, -39), Math.toRadians(90))
                 .addDisplacementMarker(() -> {
                     pixelDropper.setPosition(1.0);
                 })
                 .build();
 
-        Trajectory purpleCenter = drive.trajectoryBuilder(startPose)
-                .splineTo(new Vector2d(5, -39), Math.toRadians(90))
+        Trajectory purpleRightBackdrop = drive.trajectoryBuilder(purpleRightEntry.end())
+                .lineTo(new Vector2d(18, -54))
+                .splineToSplineHeading(new Pose2d(45, -39, Math.toRadians(0)), Math.toRadians(0))
+                .build();
+
+        Trajectory purpleCenterEntry = drive.trajectoryBuilder(startPose)
+                .splineTo(new Vector2d(11, -30), Math.toRadians(90))
                 .addDisplacementMarker(() -> {
                     pixelDropper.setPosition(1.0);
                 })
                 .build();
 
-                Trajectory purpleLeft = drive.trajectoryBuilder(startPose)
-                .splineTo(new Vector2d(9, -46), Math.toRadians(180))
-                .lineToLinearHeading(new Pose2d(-0, -46, Math.toRadians(180)))
-                .addDisplacementMarker(() -> {
-                    pixelDropper.setPosition(1.0);
-                })
-                .build();
+        Trajectory purpleLeftEntry = drive.trajectoryBuilder(startPose)
+            .splineTo(new Vector2d(15, -37.5), Math.toRadians(180))
+            .lineTo(new Vector2d(6, -37.5),
+                    SampleMecanumDrive.getVelocityConstraint(20, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                    SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+            .addDisplacementMarker(() -> {
+                pixelDropper.setPosition(1.0);
+            })
+            .build();
         // initialise vision (will loop in background)
         overallEOCVprocessor = new overallEOCVprocessor(left, right, true);
         visionPortal = VisionPortal.easyCreateWithDefaults(
@@ -63,10 +69,8 @@ public class baseAutoRB extends LinearOpMode {
 
         while(isStarted() == false){
             telemetry.addData("Identified", overallEOCVprocessor.getSelection());
-            telemetry.addData("Left", overallEOCVprocessor.distanceRectLeft);
-            telemetry.addData("Right", overallEOCVprocessor.distanceRectRight);
-            telemetry.addData("LeftColour", overallEOCVprocessor.hueLeft);
-            telemetry.addData("RightColour", overallEOCVprocessor.hueRight);
+            telemetry.addData("Left", overallEOCVprocessor.percentageLeft);
+            telemetry.addData("Right", overallEOCVprocessor.percentageRight);
             telemetry.update();
         }
         // ends vision looping & gets final selection
@@ -76,16 +80,16 @@ public class baseAutoRB extends LinearOpMode {
         if(isStopRequested()) return;
         // purple pixel --> use vision to choose drop path
         if(finalSelection == Selected.NONE) {
-            drive.followTrajectory(purpleLeft);
+            drive.followTrajectory(purpleLeftEntry);
         }
         else if (finalSelection == Selected.LEFT) {
-            drive.followTrajectory(purpleCenter);
+            drive.followTrajectory(purpleCenterEntry);
         }
         else{
             // assumes right
-            drive.followTrajectory(purpleRight);
+            drive.followTrajectory(purpleRightEntry);
+            drive.followTrajectory(purpleRightBackdrop);
         }
 
-        sleep(1000);
     }
 }
