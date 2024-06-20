@@ -50,7 +50,7 @@ public class overallEOCVprocessor implements VisionProcessor{
         percentageRight = Core.countNonZero(ranged.submat(rectRight)) / (ranged.submat(rectRight).total()/3.0);
 
 
-        if (Math.abs(percentageLeft - percentageRight) < 0.1){
+        if (Math.abs(percentageLeft - percentageRight) < 0.05){
             return Selected.NONE;
         }
         if (percentageLeft > percentageRight) {return Selected.LEFT;}
