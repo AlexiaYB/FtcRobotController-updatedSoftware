@@ -41,10 +41,14 @@ public class overallEOCVprocessor implements VisionProcessor{
         Mat mask1 = new Mat();
         Mat mask2 = new Mat();
         Mat ranged = new Mat();
-        Core.inRange(hsvMat, new Scalar(0, 70, 50), new Scalar(10, 255, 255), mask2);
-        Core.inRange(hsvMat, new Scalar(170, 70, 50), new Scalar(180, 255, 255), mask1);
-        List<Mat> src = Arrays.asList(mask1, mask2);
-        Core.hconcat(src, ranged);
+        if (red == true) {
+            Core.inRange(hsvMat, new Scalar(0, 70, 50), new Scalar(10, 255, 255), mask2);
+            Core.inRange(hsvMat, new Scalar(170, 70, 50), new Scalar(180, 255, 255), mask1);
+            List<Mat> src = Arrays.asList(mask1, mask2);
+            Core.hconcat(src, ranged);
+        } else{
+            Core.inRange(hsvMat, new Scalar (110,50,50), new Scalar(130,255,255), ranged);
+        }
         // submat & count
         percentageLeft = Core.countNonZero(ranged.submat(rectLeft)) / (ranged.submat(rectLeft).total()/3.0);
         percentageRight = Core.countNonZero(ranged.submat(rectRight)) / (ranged.submat(rectRight).total()/3.0);
