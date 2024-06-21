@@ -18,8 +18,9 @@ import java.util.List;
 
 @TeleOp
 public class DriverCentric extends LinearOpMode {
-    private ElapsedTime timer = new ElapsedTime();
+    private ElapsedTime closingtimer = new ElapsedTime();
     private ElapsedTime overallTimer = new ElapsedTime();
+    boolean closing = false;
 
     Gamepad current1 = new Gamepad();
     Gamepad previous1 = new Gamepad();
@@ -49,8 +50,8 @@ public class DriverCentric extends LinearOpMode {
 
         // set up servo positions
         drone.setPosition(0.47);
-        rightFlip.setPosition(0.3);
-        leftFlip.setPosition(0.35);
+        rightFlip.setPosition(0.5);
+        leftFlip.setPosition(0);
         claw.setPosition(0.12);
         armBase.setPosition(0.45);
         armTop.setPosition(0.53);
@@ -89,11 +90,11 @@ public class DriverCentric extends LinearOpMode {
                 imu.resetYaw();
             }
             // endgame things
-            if(overallTimer.seconds() > 90){
+//            if(overallTimer.seconds() > 90){
                 // drone firing & releasing hooks
                 if(current2.triangle){
                     drone.setPosition(0);
-                    rightFlip.setPosition(-1.0);
+                    rightFlip.setPosition(0);
                     leftFlip.setPosition(1.0);
                 }
 
@@ -113,7 +114,7 @@ public class DriverCentric extends LinearOpMode {
                     rightHanging.setPower(0);
                     leftHanging.setPower(0);
                 }
-            }
+//            }
             // driver multipliers
             if(current2.left_stick_button && !previous2.left_stick_button && driveMultiplierPlace != 0){
                 driveMultiplierPlace --;
@@ -147,20 +148,27 @@ public class DriverCentric extends LinearOpMode {
             backRightMotor.setPower(backRightPower * multipliers.get(driveMultiplierPlace));
 
             // Arm & outtake gamepad 1 controlled
+            if (closingtimer.milliseconds() > 500 && closing == true){
+                closing = false;
+                armBase.setPosition(0.55);
+            }
             if (current1.left_stick_y != 0) {
                 ArmMotor.setPower(-current1.left_stick_y);
             }else {
                 ArmMotor.setPower(0.0005);
             }
-            // active intake control
-            if (current1.dpad_right) {
-                activeIntake.setPower(-1.0);
+            if (closing == true && closingtimer.milliseconds() < 500){
+                activeIntake.setPower(-0.4);
             }
-            else if (current1.dpad_left) {
-                activeIntake.setPower(1.0);
-            }
-            else{
-                activeIntake.setPower(0.0);
+            else {
+                // active intake control
+                if (current1.dpad_right) {
+                    activeIntake.setPower(-1.0);
+                } else if (current1.dpad_left) {
+                    activeIntake.setPower(1.0);
+                } else {
+                    activeIntake.setPower(0.0);
+                }
             }
             // . setting for movement in & open claw
             if (current1.cross && !previous1.cross){
@@ -168,7 +176,7 @@ public class DriverCentric extends LinearOpMode {
             } else if (!current1.cross && previous1.cross) {
                 armBase.setPosition(0.55);
                 claw.setPosition(0.12);
-                armTop.setPosition(0.45);
+                armTop.setPosition(0.42);
             }
             // . setting for intake
             if (current1.circle && !previous1.circle){
@@ -179,8 +187,9 @@ public class DriverCentric extends LinearOpMode {
             // . setting for outtake (close)
             if (current1.square && !previous1.square){
                 claw.setPosition(1.0);
-                armBase.setPosition(0.55);
-                armTop.setPosition(0.45);
+                armTop.setPosition(0.65);
+                closing = true;
+                closingtimer.reset();
             }
             // . board setting
             if(current1.triangle && !previous1.triangle){

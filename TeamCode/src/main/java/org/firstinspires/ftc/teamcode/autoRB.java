@@ -21,7 +21,7 @@ import org.firstinspires.ftc.teamcode.overallEOCVprocessor.Selected;
 public class autoRB extends LinearOpMode {
     // adjustment constants!!!!!!
     // true if alliance partner has placed a yellow pixel on the board before us
-    boolean partnerPlaced = false;
+    boolean partnerPlaced = true;
     // 0 means stay at board, 1 means to the pointy corner, 2 means to the square corner
     int parkingLocation = 0;
 
@@ -45,6 +45,11 @@ public class autoRB extends LinearOpMode {
         Servo claw = hardwareMap.servo.get("claw");
         Servo armTop = hardwareMap.servo.get("armTop");
         Servo armBase = hardwareMap.servo.get("armBase");
+        Servo rightFlip = hardwareMap.servo.get("rightFlip");
+        Servo leftFlip = hardwareMap.servo.get("leftFlip");
+        rightFlip.setPosition(0.5);
+        leftFlip.setPosition(0);
+
         pixelDropper.setPosition(0.5);
         claw.setPosition(1.0);
         armBase.setPosition(0.55);
@@ -66,7 +71,7 @@ public class autoRB extends LinearOpMode {
 
         Trajectory purpleRightBackdrop = drive.trajectoryBuilder(purpleRightEntry.end())
                 .lineTo(new Vector2d(18, -48))
-                .splineToSplineHeading(new Pose2d(49.5, -44, Math.toRadians(0)), Math.toRadians(0))
+                .splineToSplineHeading(new Pose2d(49, -44, Math.toRadians(0)), Math.toRadians(0))
                 .build();
 
         Trajectory purpleCenterEntry = drive.trajectoryBuilder(startPose)
@@ -77,7 +82,7 @@ public class autoRB extends LinearOpMode {
                 .build();
         Trajectory purpleCenterBackdrop = drive.trajectoryBuilder(purpleCenterEntry.end())
                 .lineTo(new Vector2d(11, -39))
-                .splineToSplineHeading(new Pose2d(49.5, -39, Math.toRadians(0)), Math.toRadians(0))
+                .splineToSplineHeading(new Pose2d(49, -39, Math.toRadians(0)), Math.toRadians(0))
                 .build();
 
         Trajectory purpleLeftEntry = drive.trajectoryBuilder(startPose)
@@ -93,7 +98,7 @@ public class autoRB extends LinearOpMode {
             .lineTo(new Vector2d(15, -37.5),
                     SampleMecanumDrive.getVelocityConstraint(20, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                     SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
-                .splineToSplineHeading(new Pose2d(49.5, -32, Math.toRadians(0)), Math.toRadians(0))
+                .splineToSplineHeading(new Pose2d(49, -32, Math.toRadians(0)), Math.toRadians(0))
             .build();
 
         // initialise vision (will loop in background)
@@ -143,7 +148,7 @@ public class autoRB extends LinearOpMode {
         while(slide.getCurrentPosition() < target && opModeIsActive()){slide.setPower(0.4);}
         slide.setPower(0.0005);
         armBase.setPosition(0.35);
-        armTop.setPosition(0.37);
+        armTop.setPosition(0.39);
         sleep (500);
         claw.setPosition(0.05);
         sleep(400);

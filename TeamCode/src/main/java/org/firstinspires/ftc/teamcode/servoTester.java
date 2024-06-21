@@ -11,11 +11,15 @@ public class servoTester extends LinearOpMode {
     public static double clawPos = 0.0;
     public static double armTopPos = 0.0;
     public static double armBasePos = 0.0;
+    public static double rightflippos = 0.0;
+    public static double leftflippos = 0.0;
     @Override
     public void runOpMode() {
         Servo claw = hardwareMap.servo.get("claw");
         Servo armTop = hardwareMap.servo.get("armTop");
         Servo armBase = hardwareMap.servo.get("armBase");
+        Servo rightFlip = hardwareMap.servo.get("rightFlip");
+        Servo leftFlip = hardwareMap.servo.get("leftFlip");
 
         waitForStart();
 
@@ -25,6 +29,8 @@ public class servoTester extends LinearOpMode {
             claw.setPosition(clawPos);
             armBase.setPosition(armBasePos);
             armTop.setPosition(armTopPos);
+            leftFlip.setPosition(leftflippos);
+            rightFlip.setPosition(rightflippos);
         }
     }
 }

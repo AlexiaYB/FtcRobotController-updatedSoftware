@@ -49,6 +49,11 @@ public class autoBF extends LinearOpMode {
         Servo claw = hardwareMap.servo.get("claw");
         Servo armTop = hardwareMap.servo.get("armTop");
         Servo armBase = hardwareMap.servo.get("armBase");
+        Servo rightFlip = hardwareMap.servo.get("rightFlip");
+        Servo leftFlip = hardwareMap.servo.get("leftFlip");
+        rightFlip.setPosition(0.5);
+        leftFlip.setPosition(0);
+
         pixelDropper.setPosition(0.5);
         claw.setPosition(1.0);
         armBase.setPosition(0.55);
@@ -173,7 +178,7 @@ public class autoBF extends LinearOpMode {
                     .lineTo(new Vector2d(47, backboardPose.getY()))
                     .build();
             Trajectory park2B = drive.trajectoryBuilder(park2A.end())
-                    .lineTo(new Vector2d(47, 55))
+                    .lineTo(new Vector2d(47, 60))
                     .build();
             drive.followTrajectory(park2A);
             drive.followTrajectory(park2B);
