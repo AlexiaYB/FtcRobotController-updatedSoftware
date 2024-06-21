@@ -23,7 +23,7 @@ public class autoRB extends LinearOpMode {
     // true if alliance partner has placed a yellow pixel on the board before us
     boolean partnerPlaced = true;
     // 0 means stay at board, 1 means to the pointy corner, 2 means to the square corner
-    int parkingLocation = 0;
+    int parkingLocation = 1;
 
 
 
@@ -136,29 +136,29 @@ public class autoRB extends LinearOpMode {
             backboardPose = purpleRightBackdrop.end();
         }
         // drop on backdrop
-        int target;
-        if (partnerPlaced == true){
-            // partner on board, pixel below paper blocks
-            target = (int) (58 * COUNTS_PER_CM_slide) + slide.getCurrentPosition();
-        } else{
-            // partner not on board, pixel on paper blocks
-            target = (int) (55 * COUNTS_PER_CM_slide) + slide.getCurrentPosition();
-        }
-        slide.setPower(0.4);
-        while(slide.getCurrentPosition() < target && opModeIsActive()){slide.setPower(0.4);}
-        slide.setPower(0.0005);
-        armBase.setPosition(0.35);
-        armTop.setPosition(0.39);
-        sleep (500);
-        claw.setPosition(0.05);
-        sleep(400);
+//        int target;
+//        if (partnerPlaced == true){
+//            // partner on board, pixel below paper blocks
+//            target = (int) (58 * COUNTS_PER_CM_slide) + slide.getCurrentPosition();
+//        } else{
+//            // partner not on board, pixel on paper blocks
+//            target = (int) (55 * COUNTS_PER_CM_slide) + slide.getCurrentPosition();
+//        }
+//        slide.setPower(0.4);
+//        while(slide.getCurrentPosition() < target && opModeIsActive()){slide.setPower(0.4);}
+//        slide.setPower(0.0005);
+//        armBase.setPosition(0.35);
+//        armTop.setPosition(0.39);
+//        sleep (500);
+//        claw.setPosition(0.05);
+//        sleep(400);
 
         if(parkingLocation == 1) {
             Trajectory park1A = drive.trajectoryBuilder(backboardPose)
                     .lineTo(new Vector2d(45, backboardPose.getY()))
                     .build();
             Trajectory park1B = drive.trajectoryBuilder(park1A.end())
-                    .lineTo(new Vector2d(45, -10))
+                    .lineTo(new Vector2d(45, -7))
                     .build();
             drive.followTrajectory(park1A);
             drive.followTrajectory(park1B);
