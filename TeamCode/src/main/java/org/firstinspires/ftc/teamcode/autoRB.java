@@ -150,20 +150,20 @@ public class autoRB extends LinearOpMode {
 
         if(parkingLocation == 1) {
             Trajectory park1A = drive.trajectoryBuilder(backboardPose)
-                    .lineTo(new Vector2d(46, backboardPose.getY()))
+                    .lineTo(new Vector2d(45, backboardPose.getY()))
                     .build();
             Trajectory park1B = drive.trajectoryBuilder(park1A.end())
-                    .lineTo(new Vector2d(46, -10))
+                    .lineTo(new Vector2d(45, -10))
                     .build();
             drive.followTrajectory(park1A);
             drive.followTrajectory(park1B);
 
         }else if (parkingLocation == 2){
             Trajectory park2A = drive.trajectoryBuilder(backboardPose)
-                    .lineTo(new Vector2d(46, backboardPose.getY()))
+                    .lineTo(new Vector2d(45, backboardPose.getY()))
                     .build();
             Trajectory park2B = drive.trajectoryBuilder(park2A.end())
-                    .lineTo(new Vector2d(46, -60))
+                    .lineTo(new Vector2d(45, -60))
                     .build();
             drive.followTrajectory(park2A);
             drive.followTrajectory(park2B);

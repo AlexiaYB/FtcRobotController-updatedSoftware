@@ -15,13 +15,14 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.RR.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.RR.drive.SampleMecanumDrive;
+import org.firstinspires.ftc.teamcode.overallEOCVprocessor.Selected;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.opencv.core.Rect;
-import org.firstinspires.ftc.teamcode.overallEOCVprocessor.Selected;
 
-@Autonomous(name = "autoBB", group = "Autonomous")
+
+@Autonomous(name = "autoBF", group = "Autonomous")
 @Config
-public class autoBB extends LinearOpMode {
+public class autoBF extends LinearOpMode {
     // adjustment constants!!!!!!
     // true if alliance partner has placed a yellow pixel on the board before us
     boolean partnerPlaced = false;
@@ -32,8 +33,8 @@ public class autoBB extends LinearOpMode {
     private ElapsedTime visionTimer = new ElapsedTime();
     private overallEOCVprocessor overallEOCVprocessor;
     private VisionPortal visionPortal;
-    public static Rect left = new Rect(0, 110, 135, 200);
-    public static Rect right = new Rect(350, 90, 160, 170);
+    public static Rect left = new Rect(0, 45, 120, 180);
+    public static Rect right = new Rect(320, 90, 180, 200);
     double CPR_slide = ((((1+(46/11))) * (1+(46/11))) * 28);
     double CMPR_slide= 12;
     double COUNTS_PER_CM_slide = CPR_slide/CMPR_slide;
@@ -56,48 +57,52 @@ public class autoBB extends LinearOpMode {
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
         Pose2d backboardPose = new Pose2d();
         // build trajectories
-        Pose2d startPose = new Pose2d(15, 63, Math.toRadians(270));
+        Pose2d startPose = new Pose2d(-39, 63, Math.toRadians(270));
 
         drive.setPoseEstimate(startPose);
 
-        Trajectory visionMove = drive.trajectoryBuilder(startPose)
-                .lineTo(new Vector2d(22,63))
-                .build();
 
-        Trajectory purpleLeftEntry = drive.trajectoryBuilder(visionMove.end())
-                .splineTo(new Vector2d(28, 39), Math.toRadians(270))
+        Trajectory purpleRightEntry = drive.trajectoryBuilder(startPose)
+                .splineTo(new Vector2d(-42, 39), Math.toRadians(270))
                 .addDisplacementMarker(() -> {
                     pixelDropper.setPosition(1.0);
                 })
                 .build();
 
-        Trajectory purpleLeftBackdrop = drive.trajectoryBuilder(purpleLeftEntry.end())
-                .lineTo(new Vector2d(28, 48))
-                .splineToSplineHeading(new Pose2d(49.5, 44, Math.toRadians(0)), Math.toRadians(0))
+        Trajectory purpleRightBackdrop = drive.trajectoryBuilder(purpleRightEntry.end())
+                .lineTo(new Vector2d(-42, 49))
+                .splineToSplineHeading(new Pose2d(-39, 58, Math.toRadians(0)), Math.toRadians(0))
+                .lineTo(new Vector2d(40,58))
+                .splineTo(new Vector2d(51.5, 32), Math.toRadians(0))
                 .build();
 
-        Trajectory purpleCenterEntry = drive.trajectoryBuilder(visionMove.end())
-                .splineTo(new Vector2d(13, 29), Math.toRadians(270))
+        Trajectory purpleCenterEntry = drive.trajectoryBuilder(startPose)
+                .splineTo(new Vector2d(-35, 30), Math.toRadians(270))
                 .addDisplacementMarker(() -> {
                     pixelDropper.setPosition(1.0);
                 })
                 .build();
         Trajectory purpleCenterBackdrop = drive.trajectoryBuilder(purpleCenterEntry.end())
-                .lineTo(new Vector2d(13, 40))
-                .splineToSplineHeading(new Pose2d(49.5, 39, Math.toRadians(0)), Math.toRadians(0))
+                .lineTo(new Vector2d(-45, 40))
+                .splineToSplineHeading(new Pose2d(-39, 58, Math.toRadians(0)), Math.toRadians(0))
+                .lineTo(new Vector2d(40,58))
+                .splineTo(new Vector2d(51.5, 39), Math.toRadians(0))
                 .build();
 
-        Trajectory purpleRightEntry = drive.trajectoryBuilder(visionMove.end())
-                .splineTo(new Vector2d(8, 30), Math.toRadians(200))
+        Trajectory purpleLeftEntry = drive.trajectoryBuilder(startPose)
+                .splineTo(new Vector2d(-39, 35.5), Math.toRadians(0))
+                .lineTo(new Vector2d(-30, 35.5))
                 .addDisplacementMarker(() -> {
                     pixelDropper.setPosition(1.0);
                 })
                 .build();
-        Trajectory purpleRightBackdrop = drive.trajectoryBuilder(purpleRightEntry.end())
-                .lineTo(new Vector2d(15, 30),
+        Trajectory purpleLeftBackdrop = drive.trajectoryBuilder(purpleLeftEntry.end())
+                .lineTo(new Vector2d(-39, 37.5),
                         SampleMecanumDrive.getVelocityConstraint(20, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
-                .splineToSplineHeading(new Pose2d(49.5, 32, Math.toRadians(0)), Math.toRadians(0))
+                .splineToSplineHeading(new Pose2d(-39, 58, Math.toRadians(0)), Math.toRadians(0))
+                .lineTo(new Vector2d(40,58))
+                .splineTo(new Vector2d(51.5, 44), Math.toRadians(0))
                 .build();
 
         // initialise vision (will loop in background)
@@ -106,37 +111,34 @@ public class autoBB extends LinearOpMode {
                 hardwareMap.get(WebcamName.class, "Webcam 1"), overallEOCVprocessor);
         FtcDashboard.getInstance().startCameraStream(visionPortal, 0);
 
-        waitForStart();
-
-        if(isStopRequested()) return;
-        // move to detection point & do vision
-        drive.followTrajectory(visionMove);
-        visionTimer.reset();
-        while (visionTimer.milliseconds() < 1000 && opModeIsActive()){
+        while(isStarted() == false){
             telemetry.addData("Identified", overallEOCVprocessor.getSelection());
             telemetry.addData("Left", overallEOCVprocessor.percentageLeft);
             telemetry.addData("Right", overallEOCVprocessor.percentageRight);
             telemetry.update();
         }
+        // ends vision looping & gets final selection
         visionPortal.stopStreaming();
         Selected finalSelection = overallEOCVprocessor.getSelection();
 
+        if(isStopRequested()) return;
+
         // purple pixel --> use vision to choose drop path
         if(finalSelection == Selected.NONE) {
-            drive.followTrajectory(purpleRightEntry);
-            drive.followTrajectory(purpleRightBackdrop);
-            backboardPose = purpleRightBackdrop.end();
+            drive.followTrajectory(purpleLeftEntry);
+            drive.followTrajectory(purpleLeftBackdrop);
+            backboardPose = purpleLeftBackdrop.end();
         }
-        else if (finalSelection == Selected.RIGHT) {
+        else if (finalSelection == Selected.LEFT) {
             drive.followTrajectory(purpleCenterEntry);
             drive.followTrajectory(purpleCenterBackdrop);
             backboardPose = purpleCenterBackdrop.end();
         }
         else{
             // assumes left
-            drive.followTrajectory(purpleLeftEntry);
-            drive.followTrajectory(purpleLeftBackdrop);
-            backboardPose = purpleLeftBackdrop.end();
+            drive.followTrajectory(purpleRightEntry);
+            drive.followTrajectory(purpleRightBackdrop);
+            backboardPose = purpleRightBackdrop.end();
         }
         // drop on backdrop
         int target;
@@ -161,17 +163,17 @@ public class autoBB extends LinearOpMode {
                     .lineTo(new Vector2d(45, backboardPose.getY()))
                     .build();
             Trajectory park1B = drive.trajectoryBuilder(park1A.end())
-                    .lineTo(new Vector2d(45, 10))
+                    .lineTo(new Vector2d(45, 15))
                     .build();
             drive.followTrajectory(park1A);
             drive.followTrajectory(park1B);
 
         }else if (parkingLocation == 2){
             Trajectory park2A = drive.trajectoryBuilder(backboardPose)
-                    .lineTo(new Vector2d(45, backboardPose.getY()))
+                    .lineTo(new Vector2d(47, backboardPose.getY()))
                     .build();
             Trajectory park2B = drive.trajectoryBuilder(park2A.end())
-                    .lineTo(new Vector2d(45, 60))
+                    .lineTo(new Vector2d(47, 55))
                     .build();
             drive.followTrajectory(park2A);
             drive.followTrajectory(park2B);

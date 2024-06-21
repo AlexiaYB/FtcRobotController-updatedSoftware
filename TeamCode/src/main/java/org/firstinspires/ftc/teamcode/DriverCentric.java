@@ -172,7 +172,7 @@ public class DriverCentric extends LinearOpMode {
             }
             // . setting for intake
             if (current1.circle && !previous1.circle){
-                armBase.setPosition(0.45);
+                armBase.setPosition(0.42);
                 armTop.setPosition(0.53);
                 claw.setPosition(0.1);
             }
